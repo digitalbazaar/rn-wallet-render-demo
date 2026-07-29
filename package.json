@@ -1,0 +1,61 @@
+{
+  "name": "@bedrock/rn-wallet",
+  "version": "0.0.1-0",
+  "description": "React Native credential wallet reusing @bedrock/web-wallet",
+  "type": "module",
+  "private": true,
+  "exports": "./src/index.js",
+  "files": [
+    "src/*"
+  ],
+  "scripts": {
+    "lint": "eslint",
+    "test": "node --test 'test/node/**/*.test.js'"
+  },
+  "dependencies": {
+    "@bedrock/web-vc-store": "^8.4.0",
+    "@digitalbazaar/di-sd-primitives": "^3.3.0",
+    "@digitalbazaar/minimal-cipher": "^6.1.1",
+    "@digitalbazaar/vpqr": "^6.0.0",
+    "@digitalbazaar/x25519-key-agreement-key-2020": "^3.0.1",
+    "@noble/ciphers": "^1.2.1",
+    "@noble/curves": "^1.8.1",
+    "@noble/hashes": "^1.7.1",
+    "@scure/bip39": "^2.2.0"
+  },
+  "devDependencies": {
+    "@bedrock/web-pouch-edv": "8.3.0",
+    "@digitalbazaar/eslint-config": "^8.0.1",
+    "eslint": "^9.39.4",
+    "pouchdb-adapter-memory": "^9.0.0"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/digitalbazaar/bedrock-rn-wallet"
+  },
+  "keywords": [
+    "bedrock",
+    "react native",
+    "wallet",
+    "did",
+    "vc",
+    "verifiable credentials"
+  ],
+  "author": {
+    "name": "Digital Bazaar, Inc.",
+    "email": "support@digitalbazaar.com",
+    "url": "https://digitalbazaar.com"
+  },
+  "license": "UNLICENSED",
+  "peerDependencies": {
+    "react-native-quick-crypto": "^1.1.6"
+  },
+  "peerDependenciesMeta": {
+    "react-native-quick-crypto": {
+      "optional": true
+    }
+  }
+}

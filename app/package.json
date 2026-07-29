@@ -1,0 +1,35 @@
+{
+  "name": "rn-wallet-app",
+  "version": "0.0.1",
+  "private": true,
+  "main": "index.js",
+  "scripts": {
+    "start": "expo start --dev-client",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
+    "prebuild": "expo prebuild --clean",
+    "doctor": "npx expo-doctor"
+  },
+  "dependencies": {
+    "@op-engineering/op-sqlite": "^17.1.2",
+    "expo": "~57.0.8",
+    "expo-build-properties": "~57.0.7",
+    "expo-camera": "^57.0.3",
+    "expo-dev-client": "~57.0.9",
+    "expo-secure-store": "^57.0.1",
+    "pouchdb-adapter-react-native-sqlite": "^4.2.1",
+    "react": "19.2.3",
+    "react-native": "0.86.0",
+    "react-native-get-random-values": "~2.0.0",
+    "react-native-nitro-modules": "0.33.2",
+    "react-native-qrcode-svg": "^6.3.21",
+    "react-native-quick-base64": "^3.0.0",
+    "react-native-quick-crypto": "1.1.6",
+    "react-native-svg": "^15.15.5",
+    "react-native-webview": "13.16.1"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.26.0",
+    "babel-preset-expo": "^57.0.4"
+  }
+}

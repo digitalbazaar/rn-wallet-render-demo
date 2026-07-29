@@ -1,0 +1,133 @@
+{
+  "verifiablePresentation": {
+    "@context": [
+      "https://www.w3.org/ns/credentials/v2"
+    ],
+    "type": [
+      "VerifiablePresentation"
+    ],
+    "verifiableCredential": [
+      {
+        "@context": [
+          "https://www.w3.org/ns/credentials/v2",
+          "https://w3id.org/first-responder/v1",
+          "https://w3id.org/vc/render-method/v2rc1",
+          "https://w3id.org/vc/render-method/v2rc2"
+        ],
+        "type": [
+          "VerifiableCredential",
+          "FirstResponderCredential"
+        ],
+        "id": "urn:uuid:ab08ba48-d354-4b03-9446-eef51e385e0c",
+        "name": "Utopia Fire Fighter",
+        "description": "Utopia Fire Fighter Identification Badge.",
+        "issuer": {
+          "id": "did:key:zDnaebAMtrfK5DDSMCoKbGN8DJnnUHCvJr7EpRGJ6XPMf456z",
+          "name": "Utopia State Fire Training",
+          "image": "data:image/svg+xml;base64,<trimmed>"
+        },
+        "validFrom": "2026-01-15T00:00:00Z",
+        "validUntil": "2030-06-15T00:00:00Z",
+        "credentialSubject": {
+          "type": "FirstResponder",
+          "name": "Sam Doe",
+          "image": "data:image/svg+xml;base64,<trimmed>",
+          "ownerInformation": {
+            "homeUnit": {
+              "id": "https://www.utopia-state.example",
+              "organizationName": "Utopia State Fire Department"
+            }
+          },
+          "experience": {
+            "jobTitleOrRole": {
+              "jobTitleOrRoleName": "Fire Fighter I",
+              "jurisdictionName": "Utopia",
+              "organizationAffiliationCategoryCode": "Full-time",
+              "deploymentSummary": {
+                "deploymentStartDate": "2020-03-19",
+                "deploymentDaysNumeric": 105
+              }
+            }
+          },
+          "badge": {
+            "type": "Badge",
+            "badgeJobTitleText": "Fire Fighter I",
+            "personHumanResource": {
+              "personIDCard": {
+                "nameOnCardText": "Sam Doe",
+                "idCategoryCodeAbstract": "UFD-12-2024-0042",
+                "signatureAuthorityName": "Utopia State Fire Department",
+                "agencySymbol": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48cmVjdCB4PSI0IiB5PSI0IiB3aWR0aD0iOTIiIGhlaWdodD0iOTIiIHJ4PSIxNiIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJibGFjayIgc3Ryb2tlLXdpZHRoPSI2Ii8+PHRleHQgeD0iNTAiIHk9IjQ0IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LXNpemU9IjI4IiBmb250LXdlaWdodD0iNzAwIiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZpbGw9ImJsYWNrIj5VUzwvdGV4dD48dGV4dCB4PSI1MCIgeT0iNzQiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtc2l6ZT0iMjgiIGZvbnQtd2VpZ2h0PSI3MDAiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZmlsbD0iYmxhY2siPkZUPC90ZXh0Pjwvc3ZnPg==",
+                "cardPicture": "data:image/jpeg;base64,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"
+              }
+            }
+          }
+        },
+        "renderMethod": [
+          {
+            "name": "Landscape",
+            "mediaQuery": "@media (orientation: landscape)",
+            "type": "SvgRenderingTemplate2024",
+            "mediaType": "image/svg+xml",
+            "template": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1016\" height=\"640\" viewBox=\"0 0 1016 640\"><defs><clipPath id=\"a\"><rect x=\"72\" y=\"164\" width=\"200\" height=\"292\" rx=\"18\" ry=\"18\"/></clipPath></defs><rect x=\"24\" y=\"24\" width=\"868\" height=\"492\" rx=\"24\" fill=\"#f6f8fb\"/><rect x=\"24\" y=\"24\" width=\"868\" height=\"492\" rx=\"24\" fill=\"none\" stroke=\"#e5e7eb\" stroke-width=\"2\"/><path fill=\"#1e3a8a\" d=\"M24 24h868v6H24z\"/><path fill=\"#c81e1e\" d=\"M24 30h868v6H24z\"/><rect x=\"56\" y=\"52\" width=\"806\" height=\"66\" rx=\"18\" fill=\"#fff\" stroke=\"#e5e7eb\" stroke-width=\"2\"/><text x=\"468\" y=\"92\" font-size=\"28\" font-weight=\"700\" fill=\"#111827\" text-anchor=\"middle\" font-family=\"Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif\"> {{issuer.name}} </text><rect x=\"56\" y=\"146\" width=\"232\" height=\"332\" rx=\"20\" fill=\"#fff\" stroke=\"#e5e7eb\" stroke-width=\"2\"/><g clip-path=\"url(#a)\"><rect x=\"72\" y=\"164\" width=\"200\" height=\"292\" rx=\"18\" fill=\"#f3f4f6\"/><image x=\"72\" y=\"164\" width=\"200\" height=\"292\" href=\"{{credentialSubject.badge.personHumanResource.personIDCard.cardPicture}}\" preserveAspectRatio=\"xMidYMid slice\"/></g><rect x=\"312\" y=\"146\" width=\"550\" height=\"332\" rx=\"20\" fill=\"#fff\" stroke=\"#e5e7eb\" stroke-width=\"2\"/><g font-family=\"Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif\"><text x=\"344\" y=\"190\" font-size=\"11\" fill=\"#6b7280\" letter-spacing=\".12em\"> HOLDER </text><text x=\"344\" y=\"218\" font-size=\"22\" font-weight=\"800\" fill=\"#111827\"> {{credentialSubject.name}} </text><text x=\"604\" y=\"190\" font-size=\"11\" fill=\"#6b7280\" letter-spacing=\".12em\"> BADGE </text><text x=\"604\" y=\"218\" font-size=\"22\" font-weight=\"800\" fill=\"#111827\"> {{credentialSubject.experience.jobTitleOrRole.jobTitleOrRoleName}} </text><path stroke=\"#e5e7eb\" stroke-width=\"2\" d=\"M344 240h495\"/><text x=\"344\" y=\"260\" font-size=\"12\" fill=\"#6b7280\" letter-spacing=\".12em\"> STATE FIRE TRAINING ID </text><text x=\"344\" y=\"285\" font-size=\"16\" fill=\"#111827\" font-family=\"ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace\"> {{credentialSubject.badge.personHumanResource.personIDCard.idCategoryCodeAbstract}} </text><text x=\"344\" y=\"315\" font-size=\"12\" fill=\"#6b7280\" letter-spacing=\".12em\"> JURISDICTION </text><text x=\"344\" y=\"340\" font-size=\"16\" fill=\"#111827\"> {{credentialSubject.experience.jobTitleOrRole.jurisdictionName}} </text><path stroke=\"#e5e7eb\" stroke-width=\"2\" d=\"M344 355h495\"/><text x=\"344\" y=\"375\" font-size=\"12\" fill=\"#6b7280\" letter-spacing=\".12em\">VALID FROM</text><text x=\"344\" y=\"395\" font-size=\"16\" fill=\"#111827\" font-family=\"ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace\"> {{#formatDate}}{{validFrom}}{{/formatDate}} </text><text x=\"520\" y=\"375\" font-size=\"12\" fill=\"#6b7280\" letter-spacing=\".12em\">VALID UNTIL</text><text x=\"520\" y=\"395\" font-size=\"16\" fill=\"#111827\" font-family=\"ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace\"> {{#formatDate}}{{validUntil}}{{/formatDate}} </text><text x=\"344\" y=\"425\" font-size=\"12\" fill=\"#6b7280\" letter-spacing=\".12em\">AUTHORITY</text><text x=\"344\" y=\"445\" font-size=\"16\" fill=\"#111827\"> {{credentialSubject.badge.personHumanResource.personIDCard.signatureAuthorityName}} </text></g></svg>"
+          },
+          {
+            "type": "TemplateRenderMethod",
+            "renderSuite": "literal",
+            "renderProperty": [
+              "/issuer/name",
+              "/validFrom",
+              "/validUntil",
+              "/credentialSubject/type",
+              "/credentialSubject/name",
+              "/credentialSubject/experience/jobTitleOrRole/jurisdictionName",
+              "/credentialSubject/badge/badgeJobTitleText",
+              "/credentialSubject/badge/personHumanResource/personIDCard/nameOnCardText",
+              "/credentialSubject/badge/personHumanResource/personIDCard/idCategoryCodeAbstract",
+              "/credentialSubject/badge/personHumanResource/personIDCard/signatureAuthorityName",
+              "/credentialSubject/badge/personHumanResource/personIDCard/cardPicture"
+            ],
+            "name": "Tap to Share",
+            "outputPreference": {
+              "mode": [
+                "nfc"
+              ],
+              "mediaType": "application/octet-stream"
+            },
+            "template": "data:application/octet-stream;base64,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"
+          }
+        ],
+        "proof": [
+          {
+            "type": "DataIntegrityProof",
+            "verificationMethod": "did:key:zDnaebAMtrfK5DDSMCoKbGN8DJnnUHCvJr7EpRGJ6XPMf456z#zDnaebAMtrfK5DDSMCoKbGN8DJnnUHCvJr7EpRGJ6XPMf456z",
+            "cryptosuite": "ecdsa-rdfc-2019",
+            "proofPurpose": "assertionMethod",
+            "proofValue": "z36ttE1nh4omhM1yQnTHCgbZd5dsx4C5aibJt1HoyNh7FxJVXyqJatSQFxkGvY33SYyJ5k9EaKiqvDYiZy7gdCtYa"
+          },
+          {
+            "type": "DataIntegrityProof",
+            "verificationMethod": "did:key:zDnaebAMtrfK5DDSMCoKbGN8DJnnUHCvJr7EpRGJ6XPMf456z#zDnaebAMtrfK5DDSMCoKbGN8DJnnUHCvJr7EpRGJ6XPMf456z",
+            "cryptosuite": "ecdsa-jcs-2019",
+            "proofPurpose": "assertionMethod",
+            "@context": [
+              "https://www.w3.org/ns/credentials/v2",
+              "https://w3id.org/first-responder/v1",
+              "https://w3id.org/vc/render-method/v2rc1",
+              "https://w3id.org/vc/render-method/v2rc2"
+            ],
+            "proofValue": "z3L4QTaSpHA3UBxrQTZ8DQs4a4WTA6b5g458otT39Vb9pEH8HKTDqxVwMy8Ryjfmy3cuyQ5Y2niWj9iebzh3KZdjw"
+          },
+          {
+            "id": "urn:uuid:2d96a2ef-024a-4e47-83b4-5f70d913fc48",
+            "type": "DataIntegrityProof",
+            "verificationMethod": "did:key:zDnaebAMtrfK5DDSMCoKbGN8DJnnUHCvJr7EpRGJ6XPMf456z#zDnaebAMtrfK5DDSMCoKbGN8DJnnUHCvJr7EpRGJ6XPMf456z",
+            "cryptosuite": "ecdsa-sd-2023",
+            "proofPurpose": "assertionMethod",
+            "proofValue": "u2V0AhVhA4o1EoSiu3n8bUuXzFF3rPJ0DqdQDjr98tBg7hJW1t6BgJvFPT2mV1KKIb1xpHTKSBMRgIxtzG7k8CKljm5-MnFgjgCQCqiL1Hrt5ZKRBZGxiBRzT8ToHbwvgChXeKv3hzZgGLnlYIPNhfAOJU-K3KDiMLlVj5IRU4iZGcRbYAFF6iHqsKQ0XmDZYQADp6zmIUXoEl8XojxG3bmmoAZmhrn8h476RulhlNBodhFWqsF1pLdhXx7vwYRQ6ktSAqxPNruN4RrA3obTgvcpYQASJ3mKv8Q9rhlYXBq8P49TqTsL3J8Vm9qvwvkCXsuvU1cIocvDPW9xTDOMh_qGedODUwboYUgNtkDXnEOkHTzVYQKhqnH2sxO7A-jWJxbutBKuSwGRhEyzQJc51hULQgvWJpVafFt-R6ASxzhONyTnOlVPjxtZEigc1Un2LBGkqArdYQMYseyJSsipxD3JFGGeZmPKKi-vzxLhs1yvI3GYC-MCjZ-RT6D2n6HXorj7K-_zkQII43NBpvzMv2GBoPK1z7E5YQMf-eoW8egsusoiN_6UqUg-6euA9lV77dQfUvBftIoDp6nt624MeVP9WzKx6RAihI1TMPCdRoD4feoR2jyoUKd9YQDLFFUd2rl4Y-m--PXHUcZELzjBxAiHVAtxDCyLeZlgPnxvVoxoAvjf0G_OWFVB47GhcHMIkpqXPTDYthMcIPNlYQB3vRoMA7Cjp_fZxE2XvT64Q-j5oz2uSs5eSUx3nkRWm4xrATRlLV8xvHhYoxoaRfBTXfXJ8JEcASLqS7_mFnoRYQK77NGPcO7RTraFauggPh0N19T19rlIP84uD6cwCE5o77yX5ApGWUk1V5m_I7KGkxxXlkSvM2jK5r5bi1BhCSQdYQK_XpK8rT9DwaIcwY2JVOP82UZ9P8W670AFVtu29QBYw-kKrcqw3rvlKdDc6qUCdSQ5QuSKwXhR8CD1VGV5kv7RYQHoxabtGgDeSANe1qU8exmxDcKZgFb_vclyfnSt6LazjiUAJDmuDre6xXbO-B1zX9QS32rnlUh8ieS9QcSNDVWBYQIjQxVYOkWbWCl4mxZ9u5dTGZ4GjlPO1Cf4LPmvJM_y-7_FF9bTaQzD7GUKTp656W1u1Non4QN1_XY2tQqHEHIFYQALjaIKLmUA5H5uycsgxTJXJKXyfgrotcYPMKtrkGhv_-DUODRUDdau4eRFeyrUNq5nEupP58p86xw8DscI5HBRYQA8sK8fjpbEIn8_oG2oKAVQj_3f-ttbfc7dWpUAKysOIHglFSNrFzEkEu2hsJ1o1Pdu-8uxUwetDlPd3eesf2lRYQFhw9Ss6MPA456Toc3slQMwM6Q_UqA5o9outUzY06uDIje-WbsqYD7L9yH_a2HtL4SsU71rFpUzVQIhZHRUW5dxYQCsq3gcKj2hMCt6T-uWHoQYHbMOLw1lT-1C8_9npFU6DzA1K84csSv4sUPE86E1xk6dsTDqLWeiXw2ckJfHAsfNYQPKMjetOBcZPkesKDvPgoCffVk9mUJV0c3j1R-4MChdk6VgsIYy9vieBxVhWGrBlyIO0X6vpU47p4NuJgfGy-mxYQM_AuxB9M1oIBwdt9daiCkNnwzzdaVxkh-Oj_KjMdU8ZvykspALwji-mRKDUUncNwkbrnXXQSW_8Av2uou-Yb0FYQKE_6wyCR40gRJ6QrE1R_lIa6x0DN3Y0X-orExwga-QvM7b1Wskx-nDbYXNP_p9q3JmWoU-18TCJdhTr8W5hq0lYQBKAatEyQ8xf-ec4u35hSmToRJl5cPxUcCow_LxK68jaewll6PEhr30UlV9GgALcHW_P2gmIZGmssQFlOvZiZNhYQIAuUoH-Jyg8ORf4726P9xI-uGy6LGhEPWHaSYT4uXX0bnjLJZv7I9wqdoWmQY6_boNb_DPeasVEP4_VNLKmkMFYQLS6kuvhjARqwC4uAuNYN4yFWmLC0ZfEAW4pXZmIdUABpB1exhn3sbZCKNRoPJER4TkESna01xl0NqY39sMIa5hYQBzdlQ4qOESA-zvI2BZPAyvLRPo4-pVHHEUTrfZ71kVXKmFLDfHYZ7Taloo2rw7xl7sendqzwIpiAXeLihU4rFJYQOaraOu7zUGYeGJItSGRUykJtx-uXiR9TYBpURZjsDUr67GrKTHihTSUtn3quOFTUQgyq1hjKAcda3BxXgbquJlYQNZ5tGBuRbPejhUxT5Qr0ahnBmC9BFS41OcRvmA3EPxScE_buMuR4aKcm8YLZ6EWhK4lIeYZL5voJcETj4K7Ma9YQJsKlDRCAaiotBFYIjXJiAe2ZkxTzu653v-l9UD4El1P2vUzqpfXfseTugjnnw1Varq5C90Tq22ocqD4E3_zzZZYQBw5PoVhgdE3ZsHE8Uzl2Nhj8muqeqb1jXvSVzMu-b8nr0dfWMKhhZciFQfyE7mJ6ORquXLIOPcCaTADKOU9oVtYQDKjab4pmRZVoqPv1WYdna0-eiGtcsUBI0Bawo7iD2m8HZ1NSyeXMJo_BGj0z8__gEN9cr1Zh84X0TAf4Wqhj4pYQJ5VNWm1nwjPQOA3kYqFqUqbn2yq0h10Sr0PbhzGu4IxQajuMc3dGqShI6gSshMkxZOvwAKmyXxgPPSUEJafEShYQEu32pIPcgzeQb6oQcjogYnITZkwzibJogCzjlz_qZu8ZDlApisIkf5glECid4Qql_iqs9DsjgRy0tjtSAFj1qFYQMLH9VPERoHMQWGUm7pZO4NoAj8mesVJmLE-x-fVCZ-oqKNBb1OiGTRIkHGAhqaZWh8t9Wh7waIfCi3li0LZuaVYQNToVl7dITwj_JZsGz9g7CnCsqP7jhgWQVgRQjEuR8EnmdvTUaTO-WtM6wPt9Grr9iLs2VADer5XBwCWqaFXgpBYQFK2Wh2l5e_I10KYS5bOE2dCj1T4BGqDcneu0s--rlkfthNVfRKwHeZ8V1YYbjd23XcxggyfG_oEZHaanHf9pytYQFLRe3canbyMQHi_QfWWsr5ZBpJiML4X0pfYrRTROXWAUC11t7fSWhUszyrgM1ODlLxLZpORLcx96xGTI3h1NnJYQK9pj_ViUfGdRa4C8C6vdNOqNMMERz051iN_ZRJXsM-edYumlOIglyJT37aG7NleznusTdc8V0O5q7vABLYha4pYQCOqnUPhhaPFsqOSKtGYta-3dSd-XUC7IZhT8JML1z2cRe-bUZJNa5Ta2XZKBOeMWQGJg2j-RbO1SxxySByOtINYQLGLMTmwUJS2Fk08pVrUcJwoJf267eMY1_11ubRL4WlXiP_zuBgfxsJtTknAuXPc_YQ1eQm3LcsOUWku7bxCPNJYQMztLGFIDC3E2t60tVqh_TiuQngtKq3HW9E7x5SVUtacaaHrKw1eCdLq06l4FbeIa3bPJ2LaJu5X0lLoHfINY8JYQGAFs0PamjZK4EGSK3r6oS5r2l8PRJhgpZHT9IHyuModr1TFI3Ri4TyvjXo_zeiFEvpCN_9Xk8KZpb6-BPTKM4tYQLQ64w_t_RpeIkJ59JORYqNOulWNqhixv6T0TWx27DtmF5EvnPSbRjPha-Gc3eOFAZGWwdE81V2FOfioyb27sG9YQPMVVbi7zRsxkbC36F8ZDQKh7OBVFl8rZqEa6yfFNk6rshLtjQNE6pjb0U_aBSPMBVUoc2op-RVtlSEr9aCS_CxYQKvGJCQr_-WZPhIwqnd_gCcwFuNvIghCr8tBhnBV5LfDnKxaaCwW-LJf1_3XhyLSm8W-a1K-bdWYc22ZmrYieQxYQMPjgQ8jZPxbmlOnmtiNUgnz-wTtxPQr0x2Fb_UigYxeC6_eroBddcso59dg7fRfFdDvtIvuN3WTDcH7iVUIhM9YQFjVIrL6DyhgibgObZBNVUPlP_x9N63gulnQOdpThTTFJTDRmPbzplBtJqqeQCWb3Q8MX4gkUq2gLg9t_9uhB8xYQGnp0ErIL20L7Ax2gRwLlnRX9pMCD0yJ7uNnfXEASNc2Ct94SzmR8JWPoGkBxVZmmpQkh9wunye8f8sVIQe4TSlYQEiu6k8C8KFagRt9KwI98PlBi5W3DyRtQ0fsqJ9ARzEh-S2ySqVtbU_3_BlrNTDAOR0Qr15zMY7PXRv7sU1OPOlYQBitL7n0Ng4xyChRCrG1Djm01g3AeZy8go0bWRXDp5tmUhaWFuePRexDtM7FnZ1w3DX0y_9cfaDXSBhB8dM_RTZYQLoxpKsLwpmmzDTy3ZlMZ_7ozFCvAol-rqrZpKrzPBtYSw4p9XijhlQJ9YMbDl429BmvyoDMqGHhWFft4yPBMSxYQBkCflnRj5wCURZ-YaiRsFJLQO3tVhMSx7xdrexpHlblFYpSenKCb1t6XK-AnYKKlwYbWF4A94P05k48AUOSsxNYQKCXWo032TQL2-bM8AxXCCftYXDTYMnNPwA8iBg2H7xtk8FIovpPvUEETdzeKD7DQXXxwM2zx3X-7Y3nAFMvVq5YQMUmRoMyqTMt7NIg7O1mclnpf-GzmaLGf51FuCmA4QClTaBZ1PMrXUmuTyoLYRs9oWzd04XbNsDxB4T8ycfnHj1YQFBrZNLhlzcYr5Fz_uzjuw58enyROruxwVn53LV4BYKrY6YOnC2r0feGmILDPYrBINKn5djd_1CTcw29wXkuJO9YQJ5hS3uiia5rcD8G5tMKp9LmAEabRFbVOWnVGJy40iYudSnus7Onfw2zTpYoo6kQIaNQyjme31yd_Y1BltfKh5xYQIFPW_c8kprPeeDWZ68jf6zuxMY1TdkrRLjDmZm7j-BtNJ5wn21tPwcu1_FFqWaN8rf7SNzLIEosseeTQgrZsAlYQKQ2efeFvLcedD6uYM0bMFDFkFqAODvLl2w9ToHQH4uBdrGp9wGA0MBb83o9RKAOcA_n8NN5XGM2FlzJdPWpY46BZy9pc3N1ZXI"
+          }
+        ]
+      }
+    ]
+  }
+}

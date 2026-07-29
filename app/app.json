@@ -1,0 +1,29 @@
+{
+  "expo": {
+    "name": "RN Wallet Crypto Harness",
+    "slug": "rn-wallet-crypto-harness",
+    "version": "0.0.1",
+    "orientation": "portrait",
+    "newArchEnabled": true,
+    "ios": {
+      "bundleIdentifier": "com.digitalbazaar.rnwallet.harness",
+      "supportsTablet": true
+    },
+    "android": {
+      "package": "com.digitalbazaar.rnwallet.harness"
+    },
+    "plugins": [
+      [
+        "expo-build-properties",
+        {
+          "ios": {
+            "deploymentTarget": "16.4"
+          },
+          "android": {
+            "minSdkVersion": 24
+          }
+        }
+      ]
+    ]
+  }
+}
