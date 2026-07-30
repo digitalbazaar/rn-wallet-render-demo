@@ -49,7 +49,6 @@
     "email": "support@digitalbazaar.com",
     "url": "https://digitalbazaar.com"
   },
-  "license": "UNLICENSED",
   "peerDependencies": {
     "react-native-quick-crypto": "^1.1.6"
   },
