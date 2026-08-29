@@ -16,12 +16,13 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 
 import {
-  findHtmlRenderMethod, isRenderAllowed, renderHostPage, renderToHtml,
-  setRenderPolicy, supportsHtmlRendering, verifyTemplateDigest
+  findHtmlRenderMethod, getLanguagePreference, isRenderAllowed, renderHostPage,
+  renderToHtml, setLanguagePreference, setRenderPolicy, supportsHtmlRendering,
+  verifyTemplateDigest
 } from '../../src/render/htmlRenderMethod.js';
 import {
-  MOCK_HTML_CREDENTIAL, MOCK_HTML_CREDENTIALS, MOCK_MEMBERSHIP_CREDENTIAL,
-  MOCK_TICKET_CREDENTIAL
+  LIBRARY_HTML_TEMPLATE, MOCK_HTML_CREDENTIAL, MOCK_HTML_CREDENTIALS,
+  MOCK_LIBRARY_CREDENTIAL, MOCK_MEMBERSHIP_CREDENTIAL, MOCK_TICKET_CREDENTIAL
 } from '../../src/render/mockHtmlCredential.js';
 import {readFile} from 'node:fs/promises';
 
@@ -1016,8 +1017,8 @@ test('the demo credential does not leak its unselected field', () => {
 // =========================================
 
 /*
-The wallet lists three demo credentials and declares all three as its render
-policy. Testing only the badge would leave the other two renderable in the app
+The wallet lists four demo credentials and declares all four as its render
+policy. Testing only the badge would leave the others renderable in the app
 but unverified here, so these run the same checks across all of them.
 */
 
@@ -1097,7 +1098,7 @@ test('the bundled credentials are distinct objects with distinct ids', () => {
 });
 
 test('the bundled credentials render visibly different cards', () => {
-  /* The point of three credentials is three layouts. Identical markup would
+  /* The point of four credentials is four layouts. Identical markup would
   mean a template was reused by mistake. */
   const bodies = MOCK_HTML_CREDENTIALS.map(
     credential => renderToHtml({credential}).html);
@@ -1117,4 +1118,172 @@ test('the membership card shows its selected fields', () => {
   assert.equal(name, 'Membership');
   assert.ok(html.includes('Sustaining Member'), 'membershipLevel missing');
   assert.ok(html.includes('UAS-000000'), 'memberNumber missing');
+});
+
+// =====================
+// Language preference
+// =====================
+//
+// The host application, not the device, decides what language a template
+// renders in. This is not spec-defined -- see
+// `docs/render-method-sandbox-requirements.md` -- but it is implementable
+// within the sandbox the spec already requires, which is what these cover.
+//
+// The escape-path tests below are the interesting ones: an instance-only
+// override leaks the real device locale through the prototype getter, and a
+// prototype-only override can be shadowed by the template. Both were observed
+// in Chromium before this was implemented, so both stay as regressions.
+
+test('setLanguagePreference rejects a non-array', () => {
+  assert.throws(
+    () => setLanguagePreference({languages: 'en'}), /must be an array/);
+});
+
+test('setLanguagePreference rejects an empty array', () => {
+  assert.throws(
+    () => setLanguagePreference({languages: []}), /at least one/);
+});
+
+test('setLanguagePreference rejects a malformed tag', () => {
+  assert.throws(
+    () => setLanguagePreference({languages: ['en', 'not a tag!']}),
+    /BCP 47/);
+});
+
+test('setLanguagePreference rejects a non-string entry', () => {
+  assert.throws(
+    () => setLanguagePreference({languages: ['en', 42]}), /BCP 47/);
+});
+
+test('the default language preference is English', () => {
+  setLanguagePreference();
+  assert.deepEqual(getLanguagePreference(), ['en']);
+});
+
+test('the host language reaches the sandboxed document', () => {
+  setLanguagePreference({languages: ['fr-CA', 'fr']});
+  const {html} = renderToHtml({credential: MOCK_HTML_CREDENTIAL});
+  assert.ok(html.includes('fr-CA'), 'the host language is not in the document');
+  setLanguagePreference();
+});
+
+test('the language override is pinned on both navigator and its prototype',
+  () => {
+    /* Instance alone leaks the device locale via the prototype getter;
+    prototype alone is shadowable by the template. Both are required. */
+    setLanguagePreference({languages: ['ja-JP']});
+    const {html} = renderToHtml({credential: MOCK_HTML_CREDENTIAL});
+    assert.ok(
+      /pin\(\s*Navigator\.prototype,\s*'language'/.test(html),
+      'the prototype accessor is not redefined; device locale can leak');
+    assert.ok(
+      /pin\(\s*navigator,\s*'language'/.test(html),
+      'the instance property is not pinned; a template can shadow it');
+    assert.ok(
+      /pin\(\s*Navigator\.prototype,\s*'languages'/.test(html) &&
+      /pin\(\s*navigator,\s*'languages'/.test(html),
+      '"languages" is not pinned on both targets');
+    setLanguagePreference();
+  });
+
+test('the language override is non-configurable', () => {
+  // A configurable override is one `defineProperty` away from being replaced
+  // by the untrusted template.
+  setLanguagePreference({languages: ['ja-JP']});
+  const {html} = renderToHtml({credential: MOCK_HTML_CREDENTIAL});
+  assert.ok(
+    /configurable:\s*false/.test(html), 'the override can be redefined');
+  setLanguagePreference();
+});
+
+test('the language list is frozen against mutation', () => {
+  setLanguagePreference({languages: ['fr-CA', 'fr']});
+  const {html} = renderToHtml({credential: MOCK_HTML_CREDENTIAL});
+  assert.ok(
+    /Object\.freeze/.test(html), 'navigator.languages can be mutated in place');
+  setLanguagePreference();
+});
+
+test('the language preference is copied, not held by reference', () => {
+  const languages = ['fr-CA'];
+  setLanguagePreference({languages});
+  languages.push('zz-ZZ');
+  assert.deepEqual(getLanguagePreference(), ['fr-CA']);
+  setLanguagePreference();
+});
+
+test('getLanguagePreference returns a copy', () => {
+  setLanguagePreference({languages: ['fr-CA']});
+  getLanguagePreference().push('zz-ZZ');
+  assert.deepEqual(getLanguagePreference(), ['fr-CA']);
+  setLanguagePreference();
+});
+
+test('the language value is escaped into the document', () => {
+  /* The tag is validated, so this is belt-and-braces: if validation ever
+  loosened, the value still must not be able to close the script element. */
+  setLanguagePreference({languages: ['fr-CA']});
+  const {html} = renderToHtml({credential: MOCK_HTML_CREDENTIAL});
+  assert.ok(
+    !/<\/script>\s*<\/script>/.test(html), 'the document is malformed');
+  setLanguagePreference();
+});
+
+test('the language override runs before the template markup', async () => {
+  /* A template that reads `navigator.language` at parse time must already see
+  the host's value, so the override has to be in `<head>`. */
+  setLanguagePreference({languages: ['ja-JP']});
+  const {html} = await renderHostPage({credential: MOCK_HTML_CREDENTIAL});
+  const overrideAt = html.indexOf('Navigator.prototype');
+  const bodyAt = html.indexOf('&lt;body&gt;');
+  assert.ok(overrideAt !== -1, 'the override is missing');
+  assert.ok(
+    bodyAt === -1 || overrideAt < bodyAt,
+    'the override runs after the template markup');
+  setLanguagePreference();
+});
+
+// ============================
+// The localizing demo card
+// ============================
+
+test('the library card selects its fields', () => {
+  const {html, name} = renderToHtml({credential: MOCK_LIBRARY_CREDENTIAL});
+  assert.equal(name, 'Library card');
+  assert.ok(html.includes('UPL-0000-0000'), 'cardNumber missing');
+  assert.ok(html.includes('Utopia Central'), 'homeBranch missing');
+});
+
+test('the library template ships a table per language it claims', () => {
+  /* The card advertises three languages; a table removed by an edit would
+  otherwise show up only as an English card on a French wallet. */
+  for(const primary of ['en', 'fr', 'ja']) {
+    assert.ok(
+      new RegExp(`\\b${primary}:\\s*\\{`).test(LIBRARY_HTML_TEMPLATE),
+      `the "${primary}" string table is missing`);
+  }
+});
+
+test('the library template reads the standard navigator API', () => {
+  /* The portability claim: an issuer writes to `navigator.language` and the
+  same template localizes in a browser wallet. A wallet-specific API here
+  would break that. */
+  assert.ok(
+    LIBRARY_HTML_TEMPLATE.includes('navigator.language'),
+    'the template does not read navigator.language');
+  assert.ok(
+    !/renderMethodLanguage|window\.__/.test(LIBRARY_HTML_TEMPLATE),
+    'the template depends on a wallet-specific language API');
+});
+
+test('the library template falls back rather than rendering empty', () => {
+  assert.ok(
+    /STRINGS\[primary\]\s*\|\|\s*STRINGS\.en/.test(LIBRARY_HTML_TEMPLATE),
+    'an unknown language tag has no fallback');
+});
+
+test('the library card does not leak its unselected field', () => {
+  const {html} = renderToHtml({credential: MOCK_LIBRARY_CREDENTIAL});
+  assert.ok(
+    !html.includes('NOT-IN-RENDER-PROPERTY'), 'unselectedField reached it');
 });

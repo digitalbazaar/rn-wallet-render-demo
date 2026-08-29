@@ -171,6 +171,55 @@ Both matter because the template is untrusted:
 The channel crosses the sandbox boundary, so it carries a status and nothing
 else.
 
+## A gap: the template cannot learn the holder's language
+
+The `html` suite says nothing about language. There is no property on the render
+method, nothing in the wrapper code, and nothing in the host page algorithm, so a
+template has **no conformant way to find out what language to render in**.
+
+That gap has a default, and it is the wrong one. Inside the sandbox
+`navigator.language` is whatever the engine reports, which is the device locale.
+So a template that reads it gets:
+
+- **The wrong answer.** The holder's language is a wallet setting. A wallet whose
+  UI is in French, running on a phone set to German, would hand the holder a card
+  in German.
+- **A fingerprinting signal.** The device locale is information about the holder
+  that nothing required them to disclose, handed to issuer-supplied code by
+  default.
+
+### What this demo does
+
+The host application declares the language through `setLanguagePreference`, and
+the sandboxed document redefines `navigator.language` and `navigator.languages`
+to return it before any template code runs.
+
+The issuer's template reads the standard API and needs no wallet-specific
+extension, so the same template localizes identically in a browser wallet that
+sets these the same way. The library card
+(`MOCK_LIBRARY_CREDENTIAL`) carries English, French, and Japanese string tables
+and picks one this way; the wallet language control on the detail screen switches
+it.
+
+This is an implementation choice, not a conformance claim. It is written up here
+because a spec that stays silent leaves every wallet to invent its own answer,
+and templates stop being portable the moment two wallets choose differently.
+
+### The override has to be pinned in two places
+
+Both the prototype accessor and an own property on `navigator` are defined, and
+**neither alone is sufficient**. Verified in Chromium against a real sandboxed
+`srcdoc` frame, with the browser running under a different OS locale:
+
+| Approach | What a template still gets |
+|---|---|
+| Own property on `navigator` only | The true device locale, via `Object.getOwnPropertyDescriptor(Navigator.prototype, 'language').get.call(navigator)`. The override leaks exactly what it exists to hide. |
+| Prototype accessor only | Its own value. With nothing in the way, the template defines an own property on `navigator` and shadows the host's. |
+| Both, `configurable: false` | The host's value. Redefinition throws, and `Object.freeze` on the returned array blocks an in-place mutation of `navigator.languages`. |
+
+The instance-only version is the one an implementer is most likely to write, and
+it is the one that leaks. That is the reason this table exists.
+
 ## Verified in Chromium
 
 - **The full chain.** Sandboxed iframe → `renderMethodReady()` → transferred
@@ -184,6 +233,10 @@ else.
   alone, then confirmed `form-action 'none'` blocks it.
 - **`frame-src 'none'` does not block a `srcdoc` frame**, so the host page keeps
   the directive and still gets its iframe.
+- **The language override holds against a hostile template.** With the browser
+  under a German OS locale and the host set to `fr-CA`, a template that tried the
+  prototype getter, `Object.defineProperty`, `Reflect.set`, and mutating
+  `navigator.languages` in place read `fr-CA` every time and never saw `de-DE`.
 
 Unit tests cover the pure core with no mocks.
 
@@ -243,3 +296,4 @@ implementer will hit the same ones:
 | `setSupportsMultipleWindows={false}` blocks popups | The prop is `setSupportMultipleWindows`. Misspelled, it is silently ignored and the guard is never active. |
 | The containment props work on both platforms | `domStorageEnabled` and `allowFileAccess` are Android-only; `incognito` is iOS-only. You need both sets. |
 | `renderProperty` bounds what the template sees | `['']` and a bare string both select the entire credential — the former with no warning at all. |
+| Defining `navigator.language` on the instance hides the device locale | The real accessor is still on `Navigator.prototype`, and a template reads through it with `Object.getOwnPropertyDescriptor(...).get.call(navigator)`. Both the prototype and the instance have to be pinned, `configurable: false`. |

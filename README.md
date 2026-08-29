@@ -1,6 +1,6 @@
 # HTML render method on React Native
 
-A working demo: three verifiable credentials whose cards are drawn by the
+A working demo: four verifiable credentials whose cards are drawn by the
 **issuer's** HTML template, running on iOS and Android.
 
 The [`html` render suite](https://w3c.github.io/vc-render-method/) is defined in
@@ -66,6 +66,17 @@ used as specified.
 reference of any kind — a test asserts this — so the same template renders
 unmodified in a browser wallet and here.
 
+That extends to language. The suite says nothing about how a template learns
+which language to render in, and the sandbox default is the *device* locale —
+the wrong value, and a fingerprinting signal the holder never agreed to give the
+issuer. Here the wallet sets it, and the sandboxed document redefines
+`navigator.language` to return it, so a template localizes itself through the
+standard API rather than a wallet-specific one. The fourth card, a library card,
+renders in English, French, or Japanese from the control on its detail screen.
+The write-up, including why the obvious one-line version of that override leaks
+the device locale anyway, is in
+[`docs/render-method-sandbox-requirements.md`](docs/render-method-sandbox-requirements.md).
+
 The only React Native-specific step is the last one, relaying the finished
 status out to the application. That sits outside the sandbox boundary.
 
@@ -79,7 +90,7 @@ both deployments.
   egress, navigation, and CSP checks were run in a desktop browser. Nothing
   confirms WKWebView and the Android System WebView enforce them identically,
   and Android's engine is user-updatable. Because of that, rendering is limited
-  to credentials the application names up front — the three bundled here — and
+  to credentials the application names up front — the four bundled here — and
   the check is object identity rather than `id`, so nothing arriving from a
   scanner can reach the template path.
 - **Only inline (`data:`) templates work.** A `template.id` pointing at an
