@@ -491,19 +491,17 @@ export const LIBRARY_HTML_TEMPLATE = `
   var STRINGS = {
     en: {
       title: 'Library Card', holder: 'Holder', number: 'Card number',
-      branch: 'Home branch', expires: 'Expires',
+      expires: 'Expires',
       sample: 'SAMPLE DATA · NOT A REAL CREDENTIAL'
     },
     fr: {
       title: 'Carte de bibliothèque', holder: 'Titulaire',
-      number: 'Numéro de carte', branch: 'Succursale',
-      expires: 'Expire le',
+      number: 'Numéro de carte', expires: 'Expire le',
       sample: 'DONNÉES D’EXEMPLE · CE N’EST PAS UNE VRAIE ATTESTATION'
     },
     ja: {
       title: '図書館利用カード',
-      holder: '氏名', number: 'カード番号',
-      branch: '所属館', expires: '有効期限',
+      holder: '氏名', number: 'カード番号', expires: '有効期限',
       sample: 'サンプルデータ · 実在の証明書ではありません'
     }
   };
@@ -553,7 +551,6 @@ export const LIBRARY_HTML_TEMPLATE = `
     var rows = [
       [t.holder, subject.name],
       [t.number, subject.cardNumber],
-      [t.branch, subject.homeBranch],
       [t.expires, expires]
     ];
 
@@ -787,14 +784,13 @@ export const MOCK_LIBRARY_CREDENTIAL = {
       '/issuer/name',
       '/credentialSubject/name',
       '/credentialSubject/cardNumber',
-      '/credentialSubject/homeBranch',
       '/credentialSubject/validThrough'
     ],
     // Recomputed by the digest drift test, same as the badge above.
     template: {
       id: `data:text/html;base64,${_toBase64(LIBRARY_HTML_TEMPLATE)}`,
       mediaType: 'text/html',
-      digestMultibase: 'uEiBW3y3jnqooyEivdRV_lmZiXOLTdis7DVN9RTrc9a_cdA'
+      digestMultibase: 'uEiBQsQPXAfT1eqzP420BjBhS7qEFxUU8HwGBfSFyHwOJPg'
     }
   }]
 };

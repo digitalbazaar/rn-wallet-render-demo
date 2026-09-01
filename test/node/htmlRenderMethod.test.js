@@ -1251,7 +1251,18 @@ test('the library card selects its fields', () => {
   const {html, name} = renderToHtml({credential: MOCK_LIBRARY_CREDENTIAL});
   assert.equal(name, 'Library card');
   assert.ok(html.includes('UPL-0000-0000'), 'cardNumber missing');
-  assert.ok(html.includes('Utopia Central'), 'homeBranch missing');
+  assert.ok(html.includes('2030-01-15'), 'validThrough missing');
+});
+
+test('the library card withholds the fields it does not draw', () => {
+  /* `homeBranch` is on the credential but absent from `renderProperty`,
+  because the card does not draw it. A second canary alongside
+  `unselectedField`: least privilege means the template is not sent a field
+  merely because the credential carries one. */
+  const {html} = renderToHtml({credential: MOCK_LIBRARY_CREDENTIAL});
+  assert.ok(
+    !html.includes('Utopia Central'), 'homeBranch reached the template');
+  assert.ok(!html.includes('homeBranch'), 'the homeBranch key reached it');
 });
 
 test('the library template ships a table per language it claims', () => {
