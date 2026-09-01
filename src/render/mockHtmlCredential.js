@@ -18,10 +18,10 @@
  * expecting `{{mustache}}` interpolation, which is what distinguishes the
  * `html` suite from `SvgRenderingTemplate2024`.
  *
- * The three cards are deliberately unalike -- a dark badge, a light perforated
- * ticket, and a wide landscape membership card -- because a single template
- * would not show that the layout is the issuer's choice rather than the
- * wallet's.
+ * The four cards are deliberately unalike -- a dark badge, a light perforated
+ * ticket, a wide landscape membership card, and a library card that localizes
+ * itself -- because a single template would not show that the layout is the
+ * issuer's choice rather than the wallet's.
  */
 
 export const ISSUER_UTOPIA_FIRE =
@@ -32,6 +32,9 @@ export const ISSUER_UTOPIA_TRANSIT =
 
 export const ISSUER_UTOPIA_ARBORETUM =
   'did:key:z6MkUtopiaArbMockIssuerDoNotTrust000003';
+
+export const ISSUER_UTOPIA_LIBRARY =
+  'did:key:z6MkUtopiaLibMockIssuerDoNotTrust000004';
 
 const HOLDER = 'did:key:z6MkHolderMockSubjectDoNotTrust0000004';
 
@@ -417,6 +420,161 @@ function _toBase64(value) {
 }
 
 /**
+ * A library card template that localizes itself from `navigator.language`.
+ *
+ * This is the one template here that reads anything about its environment. It
+ * picks a string table from the standard `navigator.language`, which inside the
+ * sandbox is the value the wallet set through `setLanguagePreference`, not
+ * the device locale.
+ *
+ * Written the way an issuer would write it, which is the point: no
+ * wallet-specific API, no interpolation, and the same lookup a page would do in
+ * a browser. It falls back to English on an unknown tag, and matches on the
+ * primary subtag so `fr-CA` finds the French table.
+ *
+ * `Intl` formats the date, so the numerals and month order come from the same
+ * tag rather than from a second, hand-rolled table.
+ */
+export const LIBRARY_HTML_TEMPLATE = `
+<style>
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0;
+    font-family: -apple-system, Roboto, system-ui, sans-serif;
+    background: transparent;
+  }
+  .card {
+    border-radius: 16px;
+    padding: 18px;
+    background: linear-gradient(160deg, #3b2f6b, #241d45);
+    color: #fff;
+  }
+  .head {
+    display: flex; align-items: baseline; justify-content: space-between;
+    gap: 10px;
+  }
+  /* The title wraps and the tag chip keeps its width: a long localized title
+  would otherwise push the chip out of the card. */
+  h1 { font-size: 16px; margin: 0; flex: 1 1 auto; min-width: 0; }
+  .lang {
+    font-size: 10px; font-weight: 700; letter-spacing: .5px;
+    padding: 3px 7px; border-radius: 999px;
+    background: rgba(255,255,255,.18); color: #d9d2ff;
+    flex: 0 0 auto; white-space: nowrap;
+  }
+  .issuer { font-size: 13px; margin: 2px 0 0; color: #c3baf0; }
+  dl { margin: 16px 0 0; }
+  dt {
+    font-size: 11px; font-weight: 600; letter-spacing: .4px;
+    text-transform: uppercase; color: #c3baf0;
+  }
+  dd { font-size: 15px; margin: 2px 0 10px; }
+  .tag {
+    font-size: 9px; font-weight: 700; letter-spacing: .6px;
+    color: #c3baf0; margin-top: 4px;
+  }
+  .err { font-size: 12px; color: #ffb3b3; }
+</style>
+
+<div class="card">
+  <div class="head">
+    <h1 id="title">&mdash;</h1>
+    <span class="lang" id="lang">&mdash;</span>
+  </div>
+  <p class="issuer" id="issuer">&mdash;</p>
+  <dl id="rows"></dl>
+  <p class="tag" id="sample">&mdash;</p>
+</div>
+
+<script>
+  // The issuer ships one table per language it supports.
+  var STRINGS = {
+    en: {
+      title: 'Library Card', holder: 'Holder', number: 'Card number',
+      expires: 'Expires',
+      sample: 'SAMPLE DATA · NOT A REAL CREDENTIAL'
+    },
+    fr: {
+      title: 'Carte de bibliothèque', holder: 'Titulaire',
+      number: 'Numéro de carte', expires: 'Expire le',
+      sample: 'DONNÉES D’EXEMPLE · CE N’EST PAS UNE VRAIE ATTESTATION'
+    },
+    ja: {
+      title: '図書館利用カード',
+      holder: '氏名', number: 'カード番号', expires: '有効期限',
+      sample: 'サンプルデータ · 実在の証明書ではありません'
+    }
+  };
+
+  function readCredential() {
+    var el = document.querySelector('script[type="application/vc"]');
+    return el ? JSON.parse(el.textContent) : {};
+  }
+
+  /* Match on the primary subtag so a regional tag finds its table: "fr-CA"
+  and "fr" both select French. Unknown tags fall back to English rather than
+  rendering an empty card. */
+  function pickStrings(tag) {
+    var primary = String(tag || 'en').toLowerCase().split('-')[0];
+    return STRINGS[primary] || STRINGS.en;
+  }
+
+  function text(id, value) {
+    document.getElementById(id).textContent = value || '—';
+  }
+
+  try {
+    var vc = readCredential();
+    var subject = vc.credentialSubject || {};
+    var issuer = vc.issuer || {};
+
+    // The wallet's language, not the device's.
+    var tag = navigator.language;
+    var t = pickStrings(tag);
+
+    text('title', t.title);
+    text('lang', tag);
+    text('issuer', typeof issuer === 'string' ? issuer : issuer.name);
+    text('sample', t.sample);
+
+    var expires = subject.validThrough;
+    if(expires) {
+      try {
+        expires = new Intl.DateTimeFormat(tag, {
+          year: 'numeric', month: 'long', day: 'numeric'
+        }).format(new Date(expires));
+      } catch(e) {
+        // Keep the ISO value if the tag is one Intl will not take.
+      }
+    }
+
+    var rows = [
+      [t.holder, subject.name],
+      [t.number, subject.cardNumber],
+      [t.expires, expires]
+    ];
+
+    var dl = document.getElementById('rows');
+    rows.forEach(function(row) {
+      if(!row[1]) { return; }
+      var dt = document.createElement('dt');
+      dt.textContent = row[0];
+      var dd = document.createElement('dd');
+      dd.textContent = row[1];
+      dl.appendChild(dt);
+      dl.appendChild(dd);
+    });
+
+    if(window.renderMethodReady) { window.renderMethodReady(); }
+  } catch(e) {
+    document.getElementById('rows').innerHTML =
+      '<p class="err">' + String(e && e.message) + '</p>';
+    if(window.renderMethodReady) { window.renderMethodReady(e); }
+  }
+</script>
+`;
+
+/**
  * A first-responder style credential offering an HTML render method.
  *
  * `renderProperty` deliberately omits `unselectedField`, which the credential
@@ -583,6 +741,61 @@ export const MOCK_MEMBERSHIP_CREDENTIAL = {
 };
 
 /**
+ * A library card whose template localizes itself.
+ *
+ * The other three cards are fixed-language. This one reads
+ * `navigator.language` and renders in English, French, or Japanese from the
+ * value the wallet set, which is what makes the language plumbing visible in
+ * the running app rather than only in the tests.
+ *
+ * `validThrough` is in `renderProperty` because the template formats it with
+ * `Intl`, so the date has to reach the template rather than arriving
+ * pre-rendered.
+ */
+export const MOCK_LIBRARY_CREDENTIAL = {
+  '@context': [
+    'https://www.w3.org/ns/credentials/v2',
+    'https://w3id.org/vc/render-method/v2rc2'
+  ],
+  id: 'urn:uuid:88888888-8888-4888-8888-888888888888',
+  type: ['VerifiableCredential', 'LibraryCardCredential'],
+  issuer: {
+    id: ISSUER_UTOPIA_LIBRARY,
+    name: 'Utopia Public Library'
+  },
+  validFrom: '2026-01-15T00:00:00Z',
+  validUntil: '2030-01-15T00:00:00Z',
+  credentialSubject: {
+    id: HOLDER,
+    type: 'LibraryPatron',
+    name: 'SAMPLEHOLDER ALEX QUINN',
+    cardNumber: 'UPL-0000-0000',
+    homeBranch: 'Utopia Central',
+    validThrough: '2030-01-15',
+    // Not listed in `renderProperty`; the rendered card must not show it.
+    unselectedField: 'NOT-IN-RENDER-PROPERTY'
+  },
+  renderMethod: [{
+    type: 'TemplateRenderMethod',
+    renderSuite: 'html',
+    name: 'Library card',
+    mediaType: 'text/html',
+    renderProperty: [
+      '/issuer/name',
+      '/credentialSubject/name',
+      '/credentialSubject/cardNumber',
+      '/credentialSubject/validThrough'
+    ],
+    // Recomputed by the digest drift test, same as the badge above.
+    template: {
+      id: `data:text/html;base64,${_toBase64(LIBRARY_HTML_TEMPLATE)}`,
+      mediaType: 'text/html',
+      digestMultibase: 'uEiBQsQPXAfT1eqzP420BjBhS7qEFxUU8HwGBfSFyHwOJPg'
+    }
+  }]
+};
+
+/**
  * Every bundled demo credential, in the order the wallet lists them.
  *
  * `isDemoHtmlCredential` gates the render path on membership in this array, so
@@ -592,5 +805,6 @@ export const MOCK_MEMBERSHIP_CREDENTIAL = {
 export const MOCK_HTML_CREDENTIALS = [
   MOCK_HTML_CREDENTIAL,
   MOCK_TICKET_CREDENTIAL,
-  MOCK_MEMBERSHIP_CREDENTIAL
+  MOCK_MEMBERSHIP_CREDENTIAL,
+  MOCK_LIBRARY_CREDENTIAL
 ];

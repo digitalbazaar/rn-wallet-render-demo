@@ -30,6 +30,23 @@ function fakeSecureStore(initial = {}) {
   };
 }
 
+/* Builds a 12-word phrase that definitely fails its checksum.
+Swapping one word is not enough on its own: BIP-39's checksum is 4 bits at this
+entropy, so a substituted word still validates about 1 time in 16. Search until
+the checksum actually rejects, so the test is deterministic. Mirrors the helper
+in `recovery.test.js`. */
+function _phraseFailingChecksum() {
+  for(let attempt = 0; attempt < 100; ++attempt) {
+    const words = generateRecoveryPhrase().split(' ');
+    words[0] = words[0] === 'abandon' ? 'ability' : 'abandon';
+    const candidate = words.join(' ');
+    if(!isValidRecoveryPhrase(candidate)) {
+      return candidate;
+    }
+  }
+  throw new Error('Could not construct a checksum-failing phrase.');
+}
+
 /* --- phrases --- */
 
 test('generateRecoveryPhrase produces a valid 12-word phrase', () => {
@@ -51,12 +68,12 @@ test('isValidRecoveryPhrase rejects junk and detects typos', () => {
   assert.equal(isValidRecoveryPhrase('not a real phrase at all'), false);
   assert.equal(isValidRecoveryPhrase(undefined), false);
 
-  /* BIP-39 carries a checksum, so a single swapped word is detectable rather
-  than silently deriving the wrong key -- which would present as data loss. */
-  const words = generateRecoveryPhrase().split(' ');
-  words[0] = words[0] === 'abandon' ? 'ability' : 'abandon';
+  /* BIP-39 carries a checksum, so a swapped word is detectable rather than
+  silently deriving the wrong key -- which would present as data loss. The
+  checksum is only 4 bits at this entropy, so one substitution passes it about
+  1 time in 16; `_phraseFailingChecksum` searches for one that does not. */
   assert.equal(
-    isValidRecoveryPhrase(words.join(' ')), false,
+    isValidRecoveryPhrase(_phraseFailingChecksum()), false,
     'a mistyped word must fail the checksum');
 });
 

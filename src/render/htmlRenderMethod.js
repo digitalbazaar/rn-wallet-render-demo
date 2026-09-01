@@ -137,6 +137,58 @@ const WRAPPER_CODE = `
 })();`;
 
 /*
+Language override, prepended to the wrapper code.
+
+`navigator.language` inside a sandboxed iframe is the engine's, which is the
+device locale. This replaces it with the host application's choice so an
+issuer's template localizes itself from the standard API rather than from a
+wallet-specific one, and so the device locale is not disclosed to the template.
+
+Both the prototype accessor and an own property on `navigator` are defined, and
+neither ordering alone is sufficient. Verified in Chromium against a real
+sandboxed `srcdoc` frame:
+
+· instance only -- the template still reads the true device locale through
+  `Object.getOwnPropertyDescriptor(Navigator.prototype, 'language').get
+  .call(navigator)`, so the override leaks what it is meant to hide.
+· prototype only -- with no own property in the way, the template defines its
+  own and shadows the host's value entirely.
+
+`configurable: false` on both is what stops the template redefining them
+afterwards, and `Object.freeze` on the returned array stops an in-place
+mutation of `navigator.languages`.
+
+Wrapped in try/catch because an engine that refuses either redefinition must
+still render the card: a template that falls back to the engine's own language
+is a worse outcome than a blank card only if the card is blank.
+*/
+function _languageOverride({languages} = {}) {
+  /* JSON.stringify, not string concatenation: the tags are validated on the
+  way in, so this is the second of two independent reasons the value cannot
+  break out of the script element. */
+  const list = JSON.stringify(languages).replaceAll('<', '\\u003c');
+  return `
+(function() {
+  var LANGUAGES = ${list};
+  function first() { return LANGUAGES[0]; }
+  function all() { return Object.freeze(LANGUAGES.slice()); }
+  function pin(target, name, getter) {
+    Object.defineProperty(target, name, {
+      configurable: false, enumerable: true, get: getter
+    });
+  }
+  try {
+    // The prototype first, closing the descriptor-getter read path...
+    pin(Navigator.prototype, 'language', first);
+    pin(Navigator.prototype, 'languages', all);
+    // ...then the instance, which a template can no longer shadow.
+    pin(navigator, 'language', first);
+    pin(navigator, 'languages', all);
+  } catch(e) {}
+})();`;
+}
+
+/*
 Host page shim, for a renderer whose platform is not itself a browser page.
 
 The WebView is the *host page*, not the sandbox. It creates a real
@@ -247,6 +299,71 @@ export function isRenderAllowed({credential} = {}) {
     return false;
   }
   return _allowedCredentials.includes(credential);
+}
+
+/*
+The language tags the host application wants templates to render in, most
+preferred first.
+
+Defaults to English rather than to the device locale: this module is pure and
+has no device to ask, and a wallet that never sets a preference should get a
+predictable value rather than one that varies by handset.
+*/
+let _languages = ['en'];
+
+/* A conservative BCP 47 shape: subtags of letters or digits, 1-8 characters,
+separated by hyphens. Deliberately not a full RFC 5646 parser -- the value is
+interpolated into a script element, so the test it has to pass is "cannot be
+anything but a language tag", which this does. */
+const LANGUAGE_TAG = /^[a-zA-Z0-9]{1,8}(?:-[a-zA-Z0-9]{1,8})*$/;
+
+/**
+ * Declare the language the issuer's template should render in.
+ *
+ * The template reads the standard `navigator.language` and
+ * `navigator.languages`; this is what those return inside the sandbox. A
+ * template therefore needs no wallet-specific API to localize itself, and the
+ * same template localizes identically in a browser wallet that sets these the
+ * same way.
+ *
+ * **This is not spec-defined.** The `html` render suite says nothing about
+ * language, so a template has no conformant way to learn the holder's. See
+ * `docs/render-method-sandbox-requirements.md`.
+ *
+ * Two reasons the host value replaces the engine's rather than supplementing
+ * it. The holder's language preference is a wallet setting, and a wallet whose
+ * UI is in French should not hand a card that renders in the phone's German.
+ * And `navigator.language` inside the sandbox would otherwise be the device
+ * locale -- a fingerprinting signal the holder never agreed to give an issuer.
+ *
+ * @param {object} options - Options object.
+ * @param {Array<string>} options.languages - BCP 47 tags, most preferred first.
+ */
+export function setLanguagePreference({languages = ['en']} = {}) {
+  if(!Array.isArray(languages)) {
+    throw new TypeError('"languages" must be an array of BCP 47 tags.');
+  }
+  if(languages.length === 0) {
+    throw new TypeError('"languages" must have at least one language tag.');
+  }
+  for(const language of languages) {
+    if(typeof language !== 'string' || !LANGUAGE_TAG.test(language)) {
+      throw new TypeError(
+        `"${language}" is not a well-formed BCP 47 language tag.`);
+    }
+  }
+  // Copied, so a later mutation of the caller's array cannot change what
+  // templates see after the fact.
+  _languages = [...languages];
+}
+
+/**
+ * Get the language preference templates currently render in.
+ *
+ * @returns {Array<string>} BCP 47 tags, most preferred first.
+ */
+export function getLanguagePreference() {
+  return [..._languages];
 }
 
 /**
@@ -817,13 +934,19 @@ function _assembleDocument({markup, selected} = {}) {
 
   /* The wrapper is in `<head>`, ahead of the template markup, because a
   template that renders synchronously may call `renderMethodReady()` as soon as
-  its own script runs. */
+  its own script runs.
+
+  The language override comes first of all: a template may read
+  `navigator.language` at parse time, and by then it must already be the host's
+  value rather than the device's. */
   return `<!doctype html>
 <html>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta http-equiv="content-security-policy" content="${CSP}">
+<script class="render-method-language">${
+  _languageOverride({languages: _languages})}</script>
 <script name="credential" type="application/vc">${payload}</script>
 <script class="render-method-wrapper">${WRAPPER_CODE}</script>
 </head>
@@ -895,9 +1018,11 @@ function _escapeAttribute({value} = {}) {
 
 export default {
   findHtmlRenderMethod,
+  getLanguagePreference,
   isRenderAllowed,
   renderHostPage,
   renderToHtml,
+  setLanguagePreference,
   setRenderPolicy,
   supportsHtmlRendering,
   verifyTemplateDigest

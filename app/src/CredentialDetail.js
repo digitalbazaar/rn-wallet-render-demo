@@ -21,14 +21,28 @@ import {
 } from '../../src/wallet/presentation.js';
 import {CredentialCard} from './CredentialCard.js';
 import {HtmlRenderCard} from './HtmlRenderCard.js';
-import {isRenderAllowed} from '../../src/render/htmlRenderMethod.js';
+import {
+  getLanguagePreference, isRenderAllowed, setLanguagePreference
+} from '../../src/render/htmlRenderMethod.js';
 import QRCode from 'react-native-qrcode-svg';
 
 const {width: SCREEN_WIDTH} = Dimensions.get('window');
 
+/* The languages the demo offers. The library card's template carries a string
+table for each; the other templates ignore the setting, which is itself worth
+seeing -- localizing is the issuer's choice, not the wallet's. */
+const LANGUAGES = [
+  {tag: 'en', label: 'English'},
+  {tag: 'fr-CA', label: 'Français'},
+  {tag: 'ja-JP', label: '日本語'}
+];
+
 export function CredentialDetail({credential, description, onClose}) {
   const [page, setPage] = useState(0);
   const [timing, setTiming] = useState(null);
+  /* Seeded from the renderer so the control shows the value templates are
+  actually getting, rather than a second copy that could drift from it. */
+  const [language, setLanguage] = useState(() => getLanguagePreference()[0]);
   const scrollRef = useRef(null);
 
   /* Gated on the host application's render policy rather than on "has a render
@@ -90,8 +104,39 @@ export function CredentialDetail({credential, description, onClose}) {
           {useRenderMethod ?
             <HtmlRenderCard
               credential={credential} width={pageWidth}
-              onTiming={setTiming} /> :
+              language={language} onTiming={setTiming} /> :
             <CredentialCard description={description} onPress={() => {}} />}
+          {/* The wallet's language, which is what `navigator.language` reports
+          inside the sandbox. Switching it rebuilds the document, so a template
+          that localizes itself redraws in the new language. */}
+          {useRenderMethod && (
+            <View style={styles.langRow}>
+              <Text style={styles.langLabel}>Wallet language</Text>
+              <View style={styles.langChips}>
+                {LANGUAGES.map(({tag, label}) => (
+                  <Pressable
+                    key={tag}
+                    onPress={() => {
+                      setLanguagePreference({languages: [tag, 'en']});
+                      setLanguage(tag);
+                    }}
+                    accessibilityRole="button"
+                    accessibilityState={{selected: language === tag}}
+                    style={[
+                      styles.langChip, language === tag && styles.langChipOn
+                    ]}>
+                    <Text
+                      style={[
+                        styles.langChipText,
+                        language === tag && styles.langChipTextOn
+                      ]}>
+                      {label}
+                    </Text>
+                  </Pressable>
+                ))}
+              </View>
+            </View>
+          )}
           {/* Shown so a demo reports measured numbers rather than an
           impression. `prepare` is the JS half -- field filtering and the
           SHA-256 digest check; `display` is the WebView mounting, building the
@@ -182,6 +227,19 @@ const styles = StyleSheet.create({
     textAlign: 'center', color: '#6b7280', fontSize: 11, marginTop: 8,
     fontFamily: 'Menlo'
   },
+  langRow: {marginTop: 14, alignItems: 'center'},
+  langLabel: {
+    fontSize: 11, color: '#6b7280', fontWeight: '600', letterSpacing: 0.4,
+    textTransform: 'uppercase', marginBottom: 8
+  },
+  langChips: {flexDirection: 'row', gap: 8},
+  langChip: {
+    paddingVertical: 7, paddingHorizontal: 14, borderRadius: 999,
+    backgroundColor: '#e6e9ef', borderWidth: 1, borderColor: '#d4d9e2'
+  },
+  langChipOn: {backgroundColor: '#1f3a68', borderColor: '#1f3a68'},
+  langChipText: {fontSize: 13, color: '#41506b', fontWeight: '600'},
+  langChipTextOn: {color: '#fff'},
   hintLeft: {textAlign: 'center', color: '#c3d1ea', fontSize: 13, marginTop: 14},
   qrCard: {backgroundColor: '#1f3a68', borderRadius: 16, padding: 18},
   qrTitle: {

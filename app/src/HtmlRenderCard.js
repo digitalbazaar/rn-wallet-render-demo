@@ -41,7 +41,11 @@ anyway. A template that never signals is non-conformant, but refusing to display
 a credential because of it would be worse than showing it with a warning. */
 const READY_TIMEOUT_MS = 5000;
 
-export function HtmlRenderCard({credential, width, onTiming}) {
+/* `language` is not read here -- `renderHostPage` picks the preference up from
+module state. It is a prop so that changing the wallet's language re-runs the
+effect below and rebuilds the document; without it the card would keep showing
+the language it first rendered in. */
+export function HtmlRenderCard({credential, width, language, onTiming}) {
   const [failure, setFailure] = useState(null);
   /* 'waiting' until the template signals, per the spec's renderPromise: resolve
   means display, reject means show the error. 'timeout' is neither — the template
@@ -70,6 +74,10 @@ export function HtmlRenderCard({credential, width, onTiming}) {
 
   useEffect(() => {
     let live = true;
+    /* A rebuild is a fresh render: go back to waiting so the new document's
+    ready signal is what clears the spinner, not the previous one's. */
+    setRenderState('waiting');
+    timedOut.current = false;
     startedAt.current = Date.now();
     preparedAt.current = 0;
     renderHostPage({credential})
@@ -84,7 +92,7 @@ export function HtmlRenderCard({credential, width, onTiming}) {
     return () => {
       live = false;
     };
-  }, [credential]);
+  }, [credential, language]);
 
   /* Report once the template signals. Called from the message handler rather
   than an effect so the stamp is taken when the signal lands. */
